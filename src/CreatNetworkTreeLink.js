@@ -5,11 +5,12 @@ import { attributeService } from "spinal-env-viewer-plugin-documentation-service
 import { SpinalGraphService } from "spinal-env-viewer-graph-service";
 import { SITE_RELATION, BUILDING_RELATION, FLOOR_RELATION, FLOOR_TYPE } from "spinal-env-viewer-context-geographic-service";
 import { NetworkTreeService } from "spinal-env-viewer-plugin-network-tree-service";
-import {
-  getPositions,
-  // getFloorPositions
-} from './func.js';
-import { getFloorPositions } from "./test";
+import { getFloorEquipments, getFloorPos, findEquForPosition, addPositionToNetwork, getequipments, getPositions } from "./test";
+//import { ContextName, CategoryName, GroupPositions, GroupEquipement, distance } from "../config"
+
+const {
+  spinalPanelManagerService,
+} = require("spinal-env-viewer-panel-manager-service");
 
 export class CreatNetworkTreeLink extends SpinalContextApp {
   constructor() {
@@ -36,13 +37,37 @@ export class CreatNetworkTreeLink extends SpinalContextApp {
 
 
   async action(option) {
-    const ContextName = "Gestion des équipements";
-    const CategoryName = "Typologie";
-    const GroupName = "Positions de travail";
-    const positionsList = await getPositions(ContextName, CategoryName, GroupName);
-    const positions = await getFloorPositions(positionsList, option.selectedNode.name.get());
+    spinalPanelManagerService.openPanel("CreateNetworkTreeLink", option);
+    return;
+    const Context = ContextName;
+    const Category = CategoryName;
+    const GroupPos = GroupPositions;
+    const Groupequ = GroupEquipement;
+    const distance_pos_lum = distance;
 
-    console.log(positions);
+
+    const positionsList = await getPositions(Context, Category, GroupPos);
+
+    const EquipmentsList = await getequipments(Context, Category, Groupequ);
+
+
+
+    const EquipmentsByFloor = await getFloorEquipments(EquipmentsList, option.selectedNode.name.get());
+
+    //console.log(LumByFloor);
+
+    const PositionbyFloor = await getFloorPos(positionsList, option.selectedNode.name.get());
+
+    //console.log(PositionbyFloor);
+
+    for (const pos of PositionbyFloor) {
+      const list = findEquForPosition(pos, EquipmentsByFloor, distance_pos_lum)
+      console.log(list)
+      await addPositionToNetwork(list, pos.Position, option);
+
+    }
+
+
 
     // const selectedNode = SpinalGraphService.getRealNode(option.selectedNode.id.get());
     // const contextNode = SpinalGraphService.getRealNode(option.context.id.get());

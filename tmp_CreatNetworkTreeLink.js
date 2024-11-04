@@ -41,7 +41,7 @@ const {
        const positionsList = func.getPositions(CategoryName,CategoryName,GroupName);  
        const positions = func.getFloorPositions(positionsList,option.selectedNode.name.get());
 
-       console.log(positions)
+       //console.log(positions)
        
        const selectedNode = SpinalGraphService.getRealNode(option.selectedNode.id.get())
        const contextNode = SpinalGraphService.getRealNode(option.context.id.get())

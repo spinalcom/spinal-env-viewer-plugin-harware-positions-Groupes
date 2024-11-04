@@ -13,6 +13,7 @@ export class GenerateFloorBtn extends SpinalContextApp {
       icon_type: 'in',
       backgroundColor: '#356BAB',
       fontColor: '#FFFFFF',
+      
     });
   }
 

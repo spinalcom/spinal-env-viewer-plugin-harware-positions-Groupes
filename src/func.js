@@ -1,4 +1,9 @@
-
+import { SpinalGraphService } from "spinal-env-viewer-graph-service";
+import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
+import { attributeService } from "spinal-env-viewer-plugin-documentation-service";
+import { NetworkTreeService } from "spinal-env-viewer-plugin-network-tree-service";
+import { getFloorEquipments, getFloorPos, findEquForPosition, addPositionToNetwork, getequipments, getPositions } from "./test";
+import {CreatNetworkTreeLink}from "./CreatNetworkTreeLink";
 
 export async function getRoomsFromSpatialContext(FloorName) {
     try {
@@ -72,7 +77,7 @@ export async function getLum(ContextName, CategoryName, GroupName) {
             return;
         }
 
-        console.log("Group 'Luminaire' found:", LumGroup);
+        //console.log("Group 'Luminaire' found:", LumGroup);
 
         const Lum = await spinal.spinalGraphService.getChildren(LumGroup.id.get(), ["groupHasBIMObject"]);
         if (Lum.length === 0) {
@@ -80,7 +85,7 @@ export async function getLum(ContextName, CategoryName, GroupName) {
             return;
         }
 
-        console.log("Luminaires found:", Lum);
+        //console.log("Luminaires found:", Lum);
         return Lum;
 
     } catch (error) {
@@ -116,7 +121,7 @@ export async function getPositions(ContextName, CategoryName, GroupName) {
             return;
         }
 
-        console.log("Group 'Positions de travail' found:", PosGroup);
+        //console.log("Group 'Positions de travail' found:", PosGroup);
 
         const Positions = await spinal.spinalGraphService.getChildren(PosGroup.id.get(), ["groupHasBIMObject"]);
         if (Positions.length === 0) {
@@ -124,7 +129,7 @@ export async function getPositions(ContextName, CategoryName, GroupName) {
             return;
         }
 
-        console.log("Positions found:", Positions);
+        //console.log("Positions found:", Positions);
         return Positions;
 
     } catch (error) {
@@ -230,3 +235,49 @@ export function findLumAndPosForRoom(Room_Pos_List, Room_Lum_List, RoomID) {
     return { positions, luminaires };
 }
 
+
+export async function hardwarecontexteGeneration (PosContextName, PosCategoryName, GroupPositions,equContext,equCategory, GroupEquipement, distance) {
+
+    const PositionContext = PosContextName;
+    const PositionCategory = PosCategoryName;
+    const GroupPos = GroupPositions;
+    const EquipementsContext = equContext
+    const EquipmentsCategory = equCategory
+    const Groupequ = GroupEquipement;
+    const distance_pos_lum = distance;
+
+
+    const positionsList = await getPositions(PositionContext, PositionCategory, GroupPos);
+    const EquipmentsList = await getequipments(EquipementsContext, EquipmentsCategory, Groupequ);
+
+
+
+    const EquipmentsByFloor = await getFloorEquipments(EquipmentsList, option.selectedNode.name.get());
+
+    //console.log(LumByFloor);
+
+    const PositionbyFloor = await getFloorPos(positionsList, option.selectedNode.name.get());
+
+    //console.log(PositionbyFloor);
+
+    for (const pos of PositionbyFloor) {
+      const list = findEquForPosition(pos, EquipmentsByFloor, distance_pos_lum)
+      console.log(list)
+      //await addPositionToNetwork(list, pos.Position, option);
+
+    }
+
+
+
+    // const selectedNode = SpinalGraphService.getRealNode(option.selectedNode.id.get());
+    // const contextNode = SpinalGraphService.getRealNode(option.context.id.get());
+    // const positionNode = await selectedNode.getChildrenInContext(contextNode);
+
+    // const PositionNames = positionNode.map(node => node.name.get());
+
+    // for (const pos of positions) {
+    //   if ((!PositionNames.includes(pos.name.get())))
+    //     await SpinalGraphService.addChildInContext(option.selectedNode.id.get(), pos.id.get(), option.context.id.get(), "hasNetworkTreeBimObject", "PtrLst");
+
+    // }
+}
