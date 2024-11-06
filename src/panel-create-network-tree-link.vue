@@ -19,7 +19,7 @@
       </md-field>
     </div>
 
-    <!-- Existing Luminaires and Stores components -->
+    
     <div class="">
       <cfgLinkTree :isShown.sync="lum_isShown" title="Luminaires" :grpName.sync="lum_grpName" :catName.sync="lum_catName" :contextName.sync="lum_contextName" :distance.sync="lum_distance"></cfgLinkTree>
       <cfgLinkTree :isShown.sync="store_isShown" title="Stores" :grpName.sync="store_grpName" :contextName.sync="store_contextName" :catName.sync="store_catName" :distance.sync="store_distance"></cfgLinkTree>
@@ -68,15 +68,16 @@ export default {
     return {
       loading: false,
       lum_isShown: false,
-      lum_contextName: "",
-      lum_grpName: "",
-      lum_catName: "",
-      lum_distance: 5,
+      lum_contextName: "Gestion des équipements",
+
+      lum_grpName: "Luminaire",
+      lum_catName: "Typologie",
+      lum_distance: 3,
       store_isShown: false,
-      store_contextName: "",
+      store_contextName: "Gestion des équipements",
       store_grpName: "",
-      store_catName: "",
-      store_distance: 5,
+      store_catName: "Typologie",
+      store_distance: 3,
       modeTest: false,
       positiondbid: 0, 
       positionbimFileId: "",
@@ -85,9 +86,9 @@ export default {
       ],
       
       
-      positionContextName: "",
-      positionCategoryName: "",
-      positionGroupName: "",
+      positionContextName: "Gestion des équipements",
+      positionCategoryName: "Typologie",
+      positionGroupName: "Positions de travail",
     };
   },
   components: {
@@ -95,15 +96,59 @@ export default {
   },
   methods: {
     async onConfim() {
-      this.loading = true;
-    
+
       console.log("onConfim");
-      await hardwarecontexteGeneration(this.positionContextName, this.positionCategoryName, 
-      this.positionGroupName, this.lum_contextName, this.lum_catName, this.lum_grpName, this.lum_distance,this.option);
-      //console.log("Position Context:", this.positionContextName);
-      
+      this.loading = true;
       try {
         // Code to create the network here
+                if (this.lum_isShown && !this.store_isShown) {
+            await hardwarecontexteGeneration(
+                this.positionContextName, 
+                this.positionCategoryName, 
+                this.positionGroupName, 
+                this.lum_contextName, 
+                this.lum_catName, 
+                this.lum_grpName, 
+                this.lum_distance, 
+                this.option
+            );
+        } else if (!this.lum_isShown && this.store_isShown) {
+            await hardwarecontexteGeneration(
+                this.positionContextName, 
+                this.positionCategoryName, 
+                this.positionGroupName, 
+                this.store_contextName, 
+                this.store_catName, 
+                this.store_grpName, 
+                this.store_distance, 
+                this.option
+            );
+        } else if (this.lum_isShown && this.store_isShown) {
+            // Exécution pour les deux cas
+            await hardwarecontexteGeneration(
+                this.positionContextName, 
+                this.positionCategoryName, 
+                this.positionGroupName, 
+                this.lum_contextName, 
+                this.lum_catName, 
+                this.lum_grpName, 
+                this.lum_distance, 
+                this.option
+            );
+            await hardwarecontexteGeneration(
+                this.positionContextName, 
+                this.positionCategoryName, 
+                this.positionGroupName, 
+                this.store_contextName, 
+                this.store_catName, 
+                this.store_grpName, 
+                this.store_distance, 
+                this.option
+            );
+        }
+        
+
+
       } catch (error) {
         console.error(error);
       } finally {
@@ -140,21 +185,55 @@ export default {
   },
   computed: {
     btnDisabled() {
-    // Check if `lum_isShown` is true and required fields are not empty
-    if (this.lum_isShown) {
-      if (
-        this.lum_contextName !== "" &&
-        this.lum_catName !== "" &&
-        this.lum_grpName !== "" &&
-        this.positionContextName !== "" &&
-        this.positionCategoryName !== "" &&
-        this.positionGroupName !== ""
-      ) {
-        return false; // Enable the button
-      }
+  // Check if `lum_isShown` is true and required fields are not empty
+  if (this.lum_isShown && !this.store_isShown) {
+    if (
+      this.lum_contextName !== "" &&
+      this.lum_catName !== "" &&
+      this.lum_grpName !== "" &&
+      this.positionContextName !== "" &&
+      this.positionCategoryName !== "" &&
+      this.positionGroupName !== ""
+    ) {
+      return false; // Enable the button
     }
-    return true; // Disable the button if any condition is not met
   }
+
+  // Check if `store_isShown` is true and required fields are not empty
+  if (this.store_isShown && !this.lum_isShown) {
+    if (
+      this.store_contextName !== "" &&
+      this.store_catName !== "" &&
+      this.store_grpName !== "" &&
+      this.positionContextName !== "" &&
+      this.positionCategoryName !== "" &&
+      this.positionGroupName !== ""
+    ) {
+      return false; // Enable the button
+    }
+  }
+
+  // Check if both `lum_isShown` and `store_isShown` are true and required fields are not empty
+  if (this.lum_isShown && this.store_isShown) {
+    if (
+      this.lum_contextName !== "" &&
+      this.lum_catName !== "" &&
+      this.lum_grpName !== "" &&
+      this.store_contextName !== "" &&
+      this.store_catName !== "" &&
+      this.store_grpName !== "" &&
+      this.positionContextName !== "" &&
+      this.positionCategoryName !== "" &&
+      this.positionGroupName !== ""
+    ) {
+      return false; // Enable the button
+    }
+  }
+
+  // If none of the conditions are met, disable the button
+  return true;
+}
+
 }
 };
 

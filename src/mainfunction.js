@@ -1,8 +1,5 @@
-import { SpinalGraphService } from "spinal-env-viewer-graph-service";
-import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
-import { attributeService } from "spinal-env-viewer-plugin-documentation-service";
-import { NetworkTreeService } from "spinal-env-viewer-plugin-network-tree-service";
-import { getFloorEquipments, getFloorPos, findEquForPosition, addPositionToNetwork, getequipments, getPositions } from "./test";
+
+import { getFloorEquipments, getFloorPos, findEquForPosition, addPositionToNetwork, getequipments, getPositions, addEquipementsToPositon } from "./test";
 
 
 
@@ -32,25 +29,27 @@ export async function hardwarecontexteGeneration(PosContextName, PosCategoryName
     const PositionbyFloor = await getFloorPos(positionsList, option.selectedNode.name.get());
 
     //console.log(PositionbyFloor);
-
+     console.log("avant boucle")
     for (const pos of PositionbyFloor) {
-        const list = findEquForPosition(pos, EquipmentsByFloor, distance_pos_lum)
-        console.log(list)
-        await addPositionToNetwork(list, pos.Position, option);
-
-    }
-
-
-
-     //const selectedNode = SpinalGraphService.getRealNode(option.selectedNode.id.get());
-     //const contextNode = SpinalGraphService.getRealNode(option.context.id.get());
-     //const positionNode = await selectedNode.getChildrenInContext(contextNode);
-
-    // const PositionNames = positionNode.map(node => node.name.get());
-
-    // for (const pos of positions) {
-    //   if ((!PositionNames.includes(pos.name.get())))
-    //     await SpinalGraphService.addChildInContext(option.selectedNode.id.get(), pos.id.get(), option.context.id.get(), "hasNetworkTreeBimObject", "PtrLst");
-
-    // }
+        try {
+           
+            
+          await addPositionToNetwork(pos.Position, option);
+      
+          const list = findEquForPosition(pos, EquipmentsByFloor, distance_pos_lum);
+          console.log("Equipments found for position:", list);
+          
+         if (list !== undefined) {
+            await addEquipementsToPositon(list, pos.Position, option);
+          } else {
+            console.log(
+              "No equipment found for position",
+              pos.Position.name ? pos.Position.name.get() : "Unknown Position"
+            );
+          }
+        } catch (error) {
+          console.error("Error processing position:", pos.Position.name?.get(), error);
+        }
+      }
+      
 }

@@ -5,47 +5,6 @@ import { serviceDocumentation} from"spinal-env-viewer-plugin-documentation-servi
 import { SpinalAttribute } from "spinal-models-documentation";
 import { NetworkTreeService } from "spinal-env-viewer-plugin-network-tree-service";
 
-/*type RoomNodeRef = SpinalNodeRef
-type PosTravailNodeRef = SpinalNodeRef
-type LumNodeRef = SpinalNodeRef
-type RoomInfo = {
-  postiontravails: PosTravailNodeRef[];
-  luminaires: LumNodeRef[]
-}
-type IRoomPosition = Map<RoomNodeRef, RoomInfo>
-
-
-export async function getFloorPositions(ListOfPositions: SpinalNodeRef[], FloorName: string)
-  : Promise<IRoomPosition> {
-  const PositionInFloor = new Map<RoomNodeRef, RoomInfo>();
-  // const PositionInFloor = [];
-
-  for (let pos of ListOfPositions) {
-    const parents: RoomNodeRef[] = await SpinalGraphService.getParents(pos.id.get(), ["hasBimObject"]);
-    const roomParent = parents.find(elt => elt.type.get() === "geographicRoom");
-
-    if (roomParent) {
-
-      const floorParents: SpinalNodeRef[] = await SpinalGraphService.getParents(roomParent.id.get(), ["hasGeographicRoom"]);
-      const floorParent = floorParents.find(elt => elt.type.get() === "geographicFloor");
-
-
-      if (floorParent && floorParent.name.get() === FloorName) {
-        let roomInfo = PositionInFloor.get(roomParent);
-        if (!roomInfo) {
-          roomInfo = { postiontravails: [], luminaires: [] };
-          PositionInFloor.set(roomParent, roomInfo);
-        }
-        roomInfo.postiontravails.push(pos);
-        // PositionInFloor.set(roomParent, pos); // Add the position to the result if it belongs to the specified floor
-      }
-    }
-  }
-  
-  return PositionInFloor; // Return the list of positions in the specified floor
-
-}
-*/
 
 
 export async function getequipments(ContextName : string, CategoryName: string, GroupName:string): Promise<SpinalNodeRef[]> {
@@ -140,44 +99,7 @@ export async function getPositions(ContextName:string, CategoryName:string, Grou
       return[];
   }
 }
-/*
-type NodeLuminaire = SpinalNodeRef;
-type Attribute = SpinalAttribute;
-type LumInfo = {
-  Luminaire: NodeLuminaire;
-  Coordinates: Attribute[];
-};
 
-export async function getFloorLuminaires(
-  listOfLuminaires: SpinalNodeRef[],
-  floorName: string
-): Promise<LumInfo[]> {
-  const LumList: LumInfo[] = [];
-
-        for (const Lum of listOfLuminaires) {
-          const lumInfo: LumInfo = {
-            Luminaire: Lum,
-            Coordinates: [] 
-          };
-          
-          const parents: SpinalNodeRef[] = await SpinalGraphService.getParents(Lum.id.get(), ["hasBimObject"]);
-          const roomParent = parents.find(elt => elt.type.get() === "geographicRoom");
-
-          if (roomParent) {
-            const floorParents: SpinalNodeRef[] = await SpinalGraphService.getParents(roomParent.id.get(), ["hasGeographicRoom"]);
-            const floorParent = floorParents.find(elt => elt.type.get() === "geographicFloor");
-
-            if (floorParent && floorParent.name.get() === floorName) {
-              const RealNode = await SpinalGraphService.getRealNode(Lum.id.get());
-              lumInfo.Coordinates = await serviceDocumentation.getAttributesByCategory(RealNode, "Spatial", "XYZ center");
-              
-              LumList.push(lumInfo);
-            }
-          }
-        }
-
-  return LumList;
-}*/
 
 type NodeEquipement = SpinalNodeRef;
 type Attribute = SpinalAttribute;
@@ -265,8 +187,8 @@ export async function getFloorPos(
 export function findEquForPosition(
   PosInFloor: PositionInfo,
   ListOfequipInFloor: EquipementInfo[],
-  DistanceConst : number
-): SpinalNodeRef[] {
+  DistanceConst: number
+): SpinalNodeRef[] | undefined {
   
   const equipForPosition: SpinalNodeRef[] = [];
 
@@ -279,94 +201,30 @@ export function findEquForPosition(
         const equipCoord = equ.Coordinates.value.get();
         const [equipXcoor, equipYcoor, equipZcoor] = String(equipCoord).split(";").map(Number);
 
-        const distance = Math.sqrt(
+        const distance = (Math.sqrt(
           Math.pow(posXcoor - equipXcoor, 2) +
           Math.pow(posYcoor - equipYcoor, 2) +
           Math.pow(posZcoor - equipZcoor, 2)
-        );
-        //console.log("distance between",PosInFloor.Position.name.get(),"and",lum.Luminaire.name.get(),"is : ",distance)
+        ))*0.3048;
+
+        
+        
         if (distance < DistanceConst) {
           equipForPosition.push(equ.Equipement);
         }
-      }
-      
-      else {
-        console.log("Attribute not found for equipement", equ.Equipement.name?.get());
+      } else {
+        console.log("Attribute not found for equipment", equ.Equipement.name?.get());
       }
     }
   } else {
     console.log("Attribute not found for position", PosInFloor.Position?.name?.get());
   }
 
-  return equipForPosition;
+  // Retourne la liste si des équipements sont trouvés, sinon undefined
+  return equipForPosition.length > 0 ? equipForPosition : undefined;
 }
 
-
-/*export async function getFloorPositions(
-  listOfPositions: SpinalNodeRef[],
-  listOfLuminaires: SpinalNodeRef[],
-  floorName: string
-): Promise<IRoomPosition> {
-  const positionsInFloor: IRoomPosition = new Map<RoomNodeRef, RoomInfo>();
-
-  // Combiner les listes des positions de travail et des luminaires
-  const allElements = [
-    ...listOfPositions.map(pos => ({ node: pos, type: "position" })),
-    ...listOfLuminaires.map(lum => ({ node: lum, type: "luminaire" }))
-  ];
-
-  // Parcourir tous les éléments pour regrouper les informations par pièce et étage
-  for (let element of allElements) {
-    const parents: RoomNodeRef[] = await SpinalGraphService.getParents(element.node.id.get(), ["hasBimObject"]);
-    const roomParent = parents.find(elt => elt.type.get() === "geographicRoom");
-
-    if (roomParent) {
-      const floorParents: SpinalNodeRef[] = await SpinalGraphService.getParents(roomParent.id.get(), ["hasGeographicRoom"]);
-      const floorParent = floorParents.find(elt => elt.type.get() === "geographicFloor");
-
-      if (floorParent && floorParent.name.get() === floorName) {
-        let roomInfo = positionsInFloor.get(roomParent);
-        
-        if (!roomInfo) {
-          roomInfo = { postiontravails: [], luminaires: [] };
-          positionsInFloor.set(roomParent, roomInfo);
-        }
-
-        // Ajouter l'élément dans le tableau approprié de RoomInfo
-        if (element.type === "position") {
-          roomInfo.postiontravails.push(element.node);
-        } else if (element.type === "luminaire") {
-          roomInfo.luminaires.push(element.node);
-        }
-      }
-    }
-  }
-
-  return positionsInFloor;
-}*/
-
-
-
-
-
-
-/*async function testGetFloorPositions(PositionNames: string[], option: { selectedNode: SpinalNodeRef, context: SpinalNodeRef }) {
-  const itms = await getFloorPositions([],[], "floorName")
-  for (const [nodeRefRoom, roomInfo] of itms) {
-    for (const pos of roomInfo.postiontravails) {
-      if ((!PositionNames.includes(pos.name.get())))
-        await SpinalGraphService.addChildInContext(option.selectedNode.id.get(), pos.id.get(),
-          option.context.id.get(), "hasNetworkTreeBimObject", "PtrLst");
-      // pour les positions de travail calcule la position de la lumiere
-      // si distance < 2m alors ajoute la lumiere a la liste des lumieres de la position de traivail
-
-    }
-  }
-
-
-}*/
-
-export async function addPositionToNetwork(EquipmentsForPosition: SpinalNodeRef[],pos:SpinalNodeRef, option: { selectedNode: SpinalNodeRef, context: SpinalNodeRef }) {
+export async function addPositionToNetwork(pos:SpinalNodeRef, option: { selectedNode: SpinalNodeRef, context: SpinalNodeRef }) {
   
  let existedPos : SpinalNodeRef[]=[];
  
@@ -377,16 +235,92 @@ export async function addPositionToNetwork(EquipmentsForPosition: SpinalNodeRef[
  if(!PositionNames.includes(pos.name.get())){
 
   console.log("adding position to network")
-    const Posnode = await SpinalGraphService.addChildInContext(option.selectedNode.id.get(), pos.id.get(),
-      option.context.id.get(), "hasNetworkTreeBimObject", "PtrLst");
-      for (const equ of EquipmentsForPosition) {
-        await SpinalGraphService.addChildInContext(Posnode.info.id.get(), equ.id.get(),
-          option.context.id.get(), "hasNetworkTreeBimObject", "PtrLst");
-     }
+    await SpinalGraphService.addChildInContext(option.selectedNode.id.get(), pos.id.get(),
+      option.context.id.get(), "hasNetworkTreeBimObject", "PtrLst");   
  }
  else {
-   console.log("Position already exists")
+   console.log("Position already exist")
  }
 
 
 }
+export async function addEquipementsToPositon(
+  EquipmentsForPosition: SpinalNodeRef[],
+  pos: SpinalNodeRef,
+  option: { selectedNode: SpinalNodeRef; context: SpinalNodeRef }
+) {
+  for (const equ of EquipmentsForPosition) {
+    try {
+      const posId = pos.id?.get();
+      const equId = equ.id?.get();
+      const contextId = option.context.id?.get();
+
+      if (posId && equId && contextId) {
+        console.log("test")
+        await SpinalGraphService.addChildInContext(
+          posId,
+          equId,
+          contextId,
+          "hasNetworkTreeBimObject",
+          "PtrLst"
+        );
+      } else {
+        console.warn("Missing ID for position or equipment:", {
+          posId,
+          equId,
+          contextId,
+        });
+      }
+    } catch (error) {
+      console.error(
+        "Failed to add equipment",
+        equ.name?.get(),
+        "to position",
+        pos.name?.get(),
+        error
+      );
+    }
+  }
+}
+/*type RoomNodeRef = SpinalNodeRef
+type PosTravailNodeRef = SpinalNodeRef
+type LumNodeRef = SpinalNodeRef
+type RoomInfo = {
+  postiontravails: PosTravailNodeRef[];
+  luminaires: LumNodeRef[]
+}
+type IRoomPosition = Map<RoomNodeRef, RoomInfo>
+
+
+export async function getFloorPositions(ListOfPositions: SpinalNodeRef[], FloorName: string)
+  : Promise<IRoomPosition> {
+  const PositionInFloor = new Map<RoomNodeRef, RoomInfo>();
+  // const PositionInFloor = [];
+
+  for (let pos of ListOfPositions) {
+    const parents: RoomNodeRef[] = await SpinalGraphService.getParents(pos.id.get(), ["hasBimObject"]);
+    const roomParent = parents.find(elt => elt.type.get() === "geographicRoom");
+
+    if (roomParent) {
+
+      const floorParents: SpinalNodeRef[] = await SpinalGraphService.getParents(roomParent.id.get(), ["hasGeographicRoom"]);
+      const floorParent = floorParents.find(elt => elt.type.get() === "geographicFloor");
+
+
+      if (floorParent && floorParent.name.get() === FloorName) {
+        let roomInfo = PositionInFloor.get(roomParent);
+        if (!roomInfo) {
+          roomInfo = { postiontravails: [], luminaires: [] };
+          PositionInFloor.set(roomParent, roomInfo);
+        }
+        roomInfo.postiontravails.push(pos);
+        // PositionInFloor.set(roomParent, pos); // Add the position to the result if it belongs to the specified floor
+      }
+    }
+  }
+  
+  return PositionInFloor; // Return the list of positions in the specified floor
+
+}
+*/
+
