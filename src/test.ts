@@ -203,8 +203,7 @@ export function findEquForPosition(
 
         const distance = (Math.sqrt(
           Math.pow(posXcoor - equipXcoor, 2) +
-          Math.pow(posYcoor - equipYcoor, 2) +
-          Math.pow(posZcoor - equipZcoor, 2)
+          Math.pow(posYcoor - equipYcoor, 2) 
         ))*0.3048;
 
         
@@ -279,6 +278,18 @@ export async function addEquipementsToPositon(
         pos.name?.get(),
         error
       );
+    }
+  }
+}
+
+
+export async function removeRelationIfExist(node :SpinalNode, relationName:string, relationType:string, nodeId:string) {
+  if (node.hasRelation(relationName, relationType)) {
+    try {
+      await node.removeRelation(relationName, relationType);
+      
+    } catch (e) {
+      console.error(e);
     }
   }
 }

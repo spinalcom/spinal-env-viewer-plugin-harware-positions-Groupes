@@ -3,7 +3,8 @@ const {
   } = require('spinal-env-viewer-context-menu-service');
   import { attributeService } from "spinal-env-viewer-plugin-documentation-service";
   import { SpinalGraphService } from "spinal-env-viewer-graph-service";
-  
+  import{removeRelationIfExist}from"./test.ts"
+
     export class RemoveNetworkTreeLink extends SpinalContextApp {
       constructor() {
         super('Remove Network Tree Link', 'Spinal CDE description', {
@@ -31,45 +32,39 @@ const {
       async action(option) {
         
         try {
-          const NetworkGroupID = option.selectedNode.id.get();
-          const NetworkTreeGroupPosition = await SpinalGraphService.getChildren(NetworkGroupID, "hasNetworkTreeBimObject");
-      
-          if (NetworkTreeGroupPosition.length > 0) {
-            for (const Position of NetworkTreeGroupPosition) {
-            
-              let node = SpinalGraphService.getRealNode(Position.id.get());
+      const NetworkGroupID = option.selectedNode.id.get();
+      const NetworkTreeGroupPosition = await SpinalGraphService.getChildren(NetworkGroupID, "hasNetworkTreeBimObject");
 
-              const Children = await SpinalGraphService.getChildren(Position.id.get(), "hasNetworkTreeBimObject");
-      
-              if (Children.length === 0 && node.hasRelation("hasNetworkTreeBimObject", "PtrLst")) {
-                try {
-                  node.removeRelation("hasNetworkTreeBimObject", "PtrLst");
-                } catch (e) {
-                  console.error("Error removing relation hasNetworkTreeBimObject from node with ID:", Position.id.get(), e);
-                }
-              } else if(Children.length > 0) {
-                for (const bimObject of Children) {
-                  await SpinalGraphService.removeChild(Position.id.get(), bimObject.id.get(), "hasNetworkTreeBimObject", "PtrLst", false);
-                }
-                try {
-                  node.removeRelation("hasNetworkTreeBimObject", "PtrLst");
-                } catch (e) {
-                  console.error("Error removing relation hasNetworkTreeBimObject", e);
-                }
-              }
-      
-              await SpinalGraphService.removeChild(NetworkGroupID, Position.id.get(), "hasNetworkTreeBimObject", "PtrLst", false);
+      if (NetworkTreeGroupPosition.length > 0) {
+        for (const Position of NetworkTreeGroupPosition) {
+          let node = SpinalGraphService.getRealNode(Position.id.get());
+
+          // Récupère les positions
+          const Children = await SpinalGraphService.getChildren(Position.id.get(), "hasNetworkTreeBimObject");
+
+          if (Children.length === 0) {
+            // Si pas d'enfants, supprime la relation directement
+            await removeRelationIfExist(node, "hasNetworkTreeBimObject", "PtrLst", Position.id.get());
+          } else {
+            // Supprime chaque enfant de la position
+            for (const bimObject of Children) {
+              await SpinalGraphService.removeChild(Position.id.get(), bimObject.id.get(), "hasNetworkTreeBimObject", "PtrLst", false);
             }
+            // supprime la relation position -> equipement
+            await removeRelationIfExist(node, "hasNetworkTreeBimObject", "PtrLst", Position.id.get());
           }
-          const networkNode = SpinalGraphService.getRealNode(NetworkGroupID);
-          try {
-            networkNode.removeRelation("hasNetworkTreeBimObject", "PtrLst");
-          } catch (e) {
-            console.error("Error removing relation hasNetworkTreeBimObject from node with ID:", networkNode.id.get(), e);
-          }
-          //await SpinalGraphService.removeChild(option.context.id.get(), NetworkGroupID, "hasNetworkTreeGroup", "PtrLst", false);
-        } catch (e) {
-          console.error("Error in action function:", e);
+
+          // Supprime position
+          await SpinalGraphService.removeChild(NetworkGroupID, Position.id.get(), "hasNetworkTreeBimObject", "PtrLst", false);
         }
+      }
+
+      // Supprime les relations de l'étage vers positions
+      const networkNode = SpinalGraphService.getRealNode(NetworkGroupID);
+      await removeRelationIfExist(networkNode, "hasNetworkTreeBimObject", "PtrLst", NetworkGroupID);
+
+    } catch (e) {
+      console.error("Error in action function:", e);
+    }
   }
 }
