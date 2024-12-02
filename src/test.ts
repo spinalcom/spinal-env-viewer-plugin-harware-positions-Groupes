@@ -114,20 +114,22 @@ export async function getFloorEquipments(
   floorName: string
 ): Promise<EquipementInfo[]> {
   const EquipmentsList: EquipementInfo[] = [];
-
+  console.log("before loop list des luminaires")
   for (const equ of listOfEquipements) {
     const equiInfo: EquipementInfo = {
       Equipement: equ,
       Coordinates: null  
     };
     const parents: SpinalNodeRef[] = await SpinalGraphService.getParents(equ.id.get(), ["hasBimObject"]);
-    const roomParent = parents.find(elt => elt.type.get() === "geographicRoom");//ajouter une condition après sur la pièce pour vérifier que c'est une zoon d'un open space 
-
+    const roomParent = parents.find(elt => elt.type.get() === "geographicRoom");
+    console.log("room found",roomParent)
     if (roomParent) {
       const floorParents: SpinalNodeRef[] = await SpinalGraphService.getParents(roomParent.id.get(), ["hasGeographicRoom"]);
-      const floorParent = floorParents.find(elt => elt.type.get() === "geographicFloor");
-
-      if (floorParent && floorParent.name.get() === floorName) {
+      const floorParent = floorParents.find(elt => elt.type.get() === "geographicFloor" && elt.name.get() ===floorName);
+      console.log("floor found",floorParent)
+      console.log("floorName",floorName)
+      if (floorParent) {
+        console.log("second floor verification ")
         const RealNode = await SpinalGraphService.getRealNode(equ.id.get());
         const attributes = await serviceDocumentation.getAttributesByCategory(RealNode, "Spatial", "XYZ center");
 
@@ -135,6 +137,7 @@ export async function getFloorEquipments(
         equiInfo.Coordinates = attributes[0] || null; 
 
         EquipmentsList.push(equiInfo);
+        console.log("equipement pushed")
       }
     }
   }
@@ -165,9 +168,9 @@ export async function getFloorPos(
 
     if (roomParent) {
       const floorParents: SpinalNodeRef[] = await SpinalGraphService.getParents(roomParent.id.get(), ["hasGeographicRoom"]);
-      const floorParent = floorParents.find(elt => elt.type.get() === "geographicFloor");
+      const floorParent = floorParents.find(elt => elt.type.get() === "geographicFloor" && elt.name.get()=== floorName);
 
-      if (floorParent && floorParent.name.get() === floorName) {
+      if (floorParent) {
         const RealNode = await SpinalGraphService.getRealNode(pos.id.get());
         const attributes = await serviceDocumentation.getAttributesByCategory(RealNode, "Spatial", "XYZ center");
 

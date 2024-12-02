@@ -18,29 +18,34 @@ export async function hardwarecontexteGeneration(PosContextName, PosCategoryName
 
 
     const positionsList = await getPositions(PositionContext, PositionCategory, GroupPos);
-    const EquipmentsList = await getequipments(EquipementsContext, EquipmentsCategory, Groupequ);
+    console.log("positionsList :",positionsList)
 
+    const EquipmentsList = await getequipments(EquipementsContext, EquipmentsCategory, Groupequ);
+    console.log("EquipmentsList",EquipmentsList)
 
 
     const EquipmentsByFloor = await getFloorEquipments(EquipmentsList, option.selectedNode.name.get());
+     console.log("option selected node",option.selectedNode.name.get())
 
-    //console.log(LumByFloor);
+    console.log("EquipmentsByFloor",EquipmentsByFloor);
 
     const PositionbyFloor = await getFloorPos(positionsList, option.selectedNode.name.get());
 
-    //console.log(PositionbyFloor);
+    console.log("PositionbyFloor",PositionbyFloor);
      console.log("avant boucle")
     for (const pos of PositionbyFloor) {
+      console.log("in loop") 
         try {
            
-            
-          await addPositionToNetwork(pos.Position, option);
+           
+          //await addPositionToNetwork(pos.Position, option);
       
           const list = findEquForPosition(pos, EquipmentsByFloor, distance_pos_lum);
           console.log("Equipments found for position:", list);
           
          if (list !== undefined) {
-            await addEquipementsToPositon(list, pos.Position, option);
+            //await addEquipementsToPositon(list, pos.Position, option);
+            console.log("adding equipment list to position",pos.Position.name.get())
           } else {
             console.log(
               "No equipment found for position",

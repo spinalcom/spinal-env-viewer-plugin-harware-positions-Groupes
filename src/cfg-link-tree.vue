@@ -20,7 +20,7 @@
 
       <md-field>
         <label>Distance</label>
-        <md-input v-model="distance_comp" type="number"></md-input>
+        <md-input v-model="distance_comp" type="number" step="0.01">></md-input>
       </md-field>
     </template>
   </div>
@@ -91,15 +91,27 @@ export default {
         this.$emit('update:catName', value);
       }
     },
-    distance_comp: {
+    /*distance_comp: {
       get() {
         return this.distance.toString() ;
       },
       set(value) {
         this.$emit('update:distance', parseInt(value));
       }
+    }*/
+    distance_comp: {
+      get() {
+        return this.distance.toString(); // Ensure it's displayed as a string in the input field
+      },
+      set(value) {
+        const floatValue = parseFloat(value); // Parse the value as a float
+        if (!isNaN(floatValue)) { // Ensure valid float before emitting
+          this.$emit('update:distance', floatValue);
+        } else {
+          this.$emit('update:distance', 0); // Default to 0 if invalid
+        }
+      }
     }
-
   }
 };
 </script>
