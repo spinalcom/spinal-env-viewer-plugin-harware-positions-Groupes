@@ -34,7 +34,7 @@ SpinalForgeExtention.registerExtention('CreateNetworkTreeLink', SpinalForgeExten
     parentContainer: document.body,
   
     panel: {
-      title: "Generate / Update Hardware Context",
+      title: "Generate Hardware Context",
       classname: "spinal-pannel",
       closeBehaviour: "delete"
     },

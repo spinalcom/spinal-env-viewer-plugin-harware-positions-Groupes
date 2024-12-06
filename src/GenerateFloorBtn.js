@@ -24,7 +24,7 @@ export class GenerateFloorBtn extends SpinalContextApp {
     const attributes = await attributeService.getAttrBySchema(selectedNode, {
       "Hardware Context": ["Hardware Context Type"]
     })
-    if (attributes["Hardware Context"]?.["Hardware Context Type"] !== "Position_Luminaire")
+    if (attributes["Hardware Context"]?.["Hardware Context Type"] !== "Position_Groupe D'ALI")
       return -1;
     return true;
   }

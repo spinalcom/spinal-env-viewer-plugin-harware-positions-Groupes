@@ -14,7 +14,7 @@ const {
 
 export class CreatNetworkTreeLink extends SpinalContextApp {
   constructor() {
-    super('Link position to luminaire', 'Spinal CDE description', {
+    super('Link position to Groupe', 'Spinal CDE description', {
       icon: 'lightbulb',
       icon_type: 'in',
       backgroundColor: '#356BAB',
@@ -30,7 +30,7 @@ export class CreatNetworkTreeLink extends SpinalContextApp {
     const attributes = await attributeService.getAttrBySchema(contextNode, {
       "Hardware Context": ["Hardware Context Type"]
     });
-    if (attributes["Hardware Context"]?.["Hardware Context Type"] !== "Position_Luminaire")
+    if (attributes["Hardware Context"]?.["Hardware Context Type"] !== "Position_Groupe D'ALI")
       return -1;
     return true;
   }

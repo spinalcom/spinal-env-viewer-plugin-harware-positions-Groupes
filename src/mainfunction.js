@@ -1,60 +1,73 @@
 
-import { getFloorEquipments, getFloorPos, findEquForPosition, addPositionToNetwork, getequipments, getPositions, addEquipementsToPositon } from "./test";
+import { matchBIMandBMSGateways,FindBMSGateways,FindBimGateways, getFloorPos, gethardwarecontext, addPositionToNetwork, getequipments, getPositions, addEquipementsToPositon } from "./test";
+import{AddGrpToPos}from "./findGroupDALI"
 
 
 
 
 
-
-export async function hardwarecontexteGeneration(PosContextName, PosCategoryName, GroupPositions, equContext, equCategory, GroupEquipement, distance,option) {
-
+export async function hardwarecontexteGeneration(PosContextName, PosCategoryName, GroupPositions,
+                                                 GatewayContext, GatewayCat, GatewayGrp,
+                                                 NetworkContext,NetworkOrgan,Network,
+                                                 HContext,option) {
+    //Bim Objects Context For Positions
     const PositionContext = PosContextName;
     const PositionCategory = PosCategoryName;
     const GroupPos = GroupPositions;
-    const EquipementsContext = equContext
-    const EquipmentsCategory = equCategory
-    const Groupequ = GroupEquipement;
-    const distance_pos_lum = distance;
+    
+    // Bim Objects Conecxt For Gatways
+    const GatContexte = GatewayContext;
+    const GatCategory = GatewayCat;
+    const GatGroup = GatewayGrp;
+    
+    // Network Context
+    const NetContext = NetworkContext;
+    const NetOrgan = NetworkOrgan;
+    const NetName = Network;
+
+    // Hardware context position ==> Luminaiers 
+    const HardwareContext = HContext;
 
 
     const positionsList = await getPositions(PositionContext, PositionCategory, GroupPos);
     console.log("positionsList :",positionsList)
 
-    const EquipmentsList = await getequipments(EquipementsContext, EquipmentsCategory, Groupequ);
-    console.log("EquipmentsList",EquipmentsList)
-
-
-    const EquipmentsByFloor = await getFloorEquipments(EquipmentsList, option.selectedNode.name.get());
-     console.log("option selected node",option.selectedNode.name.get())
-
-    console.log("EquipmentsByFloor",EquipmentsByFloor);
-
     const PositionbyFloor = await getFloorPos(positionsList, option.selectedNode.name.get());
 
-    console.log("PositionbyFloor",PositionbyFloor);
-     console.log("avant boucle")
+    //console.log("PositionbyFloor",PositionbyFloor);
+     console.log("Starting process to add positions...")
     for (const pos of PositionbyFloor) {
       console.log("in loop") 
         try {
            
            
-          //await addPositionToNetwork(pos.Position, option);
+          await addPositionToNetwork(pos.Position, option);
       
-          const list = findEquForPosition(pos, EquipmentsByFloor, distance_pos_lum);
-          console.log("Equipments found for position:", list);
-          
-         if (list !== undefined) {
-            //await addEquipementsToPositon(list, pos.Position, option);
-            console.log("adding equipment list to position",pos.Position.name.get())
-          } else {
-            console.log(
-              "No equipment found for position",
-              pos.Position.name ? pos.Position.name.get() : "Unknown Position"
-            );
-          }
+          console.log("adding position",pos.Position.name.get())
         } catch (error) {
           console.error("Error processing position:", pos.Position.name?.get(), error);
         }
       }
+     
+      console.log("Starting process to add Groups to positions ...")  
+
+      const bimgatways = await FindBimGateways(GatContexte, GatCategory, GatGroup);
+      console.log("bimgatways",bimgatways)
       
+      
+      const bmsgatways = await FindBMSGateways(NetContext, NetOrgan, NetName);
+      console.log("bmsgatways",bmsgatways)
+      
+      const gatwaysList = await matchBIMandBMSGateways(bimgatways, bmsgatways,option.selectedNode.name.get());
+      console.log("match",gatwaysList)
+      
+      
+      const HardwareContextNode = gethardwarecontext(HardwareContext);
+      
+      for (const gat of gatwaysList) {
+        console.log(" starting process for gateway",gat.name.get()) 
+          
+         await AddGrpToPos(HardwareContextNode,gat,option.selectedNode.name.get(),option.context.id.get())
+      }
+      console.log("Done")    
 }

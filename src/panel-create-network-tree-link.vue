@@ -5,7 +5,7 @@
       <h3>Positions de travail</h3>
       <md-field>
         <label>Context Name</label>
-        <md-input v-model="positionContextName" placeholder=" Context name"></md-input>
+        <md-input v-model="positionContextName" placeholder="Context name"></md-input>
       </md-field>
 
       <md-field>
@@ -19,22 +19,68 @@
       </md-field>
     </div>
 
-    
-    <div class="">
-      <cfgLinkTree :isShown.sync="lum_isShown" title="Luminaires" :grpName.sync="lum_grpName" :catName.sync="lum_catName" :contextName.sync="lum_contextName" :distance.sync="lum_distance"></cfgLinkTree>
-      <cfgLinkTree :isShown.sync="store_isShown" title="Stores" :grpName.sync="store_grpName" :contextName.sync="store_contextName" :catName.sync="store_catName" :distance.sync="store_distance"></cfgLinkTree>
+    <!-- Gateway section -->
+    <div class="Gateway-section">
+      <h3>Gateway</h3>
+      <md-field>
+        <label>Context Name</label>
+        <md-input v-model="GatewayContextName" placeholder="Context name"></md-input>
+      </md-field>
+
+      <md-field>
+        <label>Category Name</label>
+        <md-input v-model="GatewayCategoryName" placeholder="Category name"></md-input>
+      </md-field>
+
+      <md-field>
+        <label>Group Name</label>
+        <md-input v-model="GatewayGroupName" placeholder="Group name"></md-input>
+      </md-field>
     </div>
 
-    <!-- Confirm button -->
-    <md-button @click="onConfim" :disabled="btnDisabled">confirm</md-button>
+    <!-- OPCUA Network section -->
+    <div class="Network-section">
+      <h3>OPCUA Network</h3>
+      <md-field>
+        <label>Network Context OPCUA</label>
+        <md-input v-model="ContextNetworkName" placeholder="Network Context name"></md-input>
+      </md-field>
 
-    <!-- List and progress bar -->
+      <md-field>
+        <label>Network Organ OPCUA</label>
+        <md-input v-model="OrganNetworkName" placeholder="Organ name"></md-input>
+      </md-field>
+
+      <md-field>
+        <label>Network</label>
+        <md-input v-model="NetworkName" placeholder="Network name"></md-input>
+      </md-field>
+    </div>
+
+    <!-- Link Trees -->
+    <div>
+      <cfgLinkTree 
+        :isShown.sync="lum_isShown" 
+        title="Hardware contexte basé sur Luminaires" 
+        :contextName.sync="lum_contextName">
+      </cfgLinkTree>
+      
+      <cfgLinkTree 
+        :isShown.sync="store_isShown" 
+        title="Hardware contexte basé sur Stores" 
+        :contextName.sync="store_contextName">
+      </cfgLinkTree>
+    </div>
+
+    <!-- Confirm Button -->
+    <md-button @click="onConfim" :disabled="btnDisabled">Confirm</md-button>
+
+    <!-- List and Progress Bar -->
     <md-list v-if="modeTest">
       <md-list-item>
         <div class="md-list-item-text">
-          <span>position de travail</span>
+          <span>Position de travail</span>
         </div>
-
         <md-button class="md-icon-button md-list-action" @click="showObject(positiondbid, positionbimFileId)">
           <md-icon>sms</md-icon>
         </md-button>
@@ -42,13 +88,11 @@
 
       <md-divider class="md-inset"></md-divider>
 
-      <md-subheader>objets</md-subheader>
-
+      <md-subheader>Objets</md-subheader>
       <md-list-item v-for="item in listDemo" :key="item.dbid">
         <div class="md-list-item-text">
           <span>{{ item.distance }}</span>
         </div>
-
         <md-button class="md-icon-button md-list-action" @click="showObject(item.dbid, item.bimFileId)">
           <md-icon>sms</md-icon>
         </md-button>
@@ -59,36 +103,38 @@
   </div>
 </template>
 
+
 <script>
-import cfgLinkTree from "./cfg-link-tree.vue"
-import {hardwarecontexteGeneration}from "./mainfunction.js"
+import cfgLinkTree from "./cfg-link-tree.vue";
+import { hardwarecontexteGeneration } from "./mainfunction.js";
+
 export default {
   name: "CreateNetworkTreeLink",
   data() {
     return {
       loading: false,
       lum_isShown: false,
-      lum_contextName: "Gestion des équipements",
+      lum_contextName: "Hardware Context Luminaires_old",
 
-      lum_grpName: "Luminaire",
-      lum_catName: "Typologie",
-      lum_distance: 2,
       store_isShown: false,
-      store_contextName: "Gestion des équipements",
-      store_grpName: "",
-      store_catName: "Typologie",
-      store_distance: 2,
+      store_contextName: "Hardware context positions Stores",
+
       modeTest: false,
       positiondbid: 0, 
       positionbimFileId: "",
-      listDemo: [
-        // { dbid: 4917, distance: 2, bimFileId: "SpinalNode-..." }
-      ],
-      
+      listDemo: [],
       
       positionContextName: "Gestion des équipements",
       positionCategoryName: "Typologie",
       positionGroupName: "Positions de travail",
+
+      GatewayContextName: "Gestion des équipements",
+      GatewayCategoryName: "Network",
+      GatewayGroupName: "OPCUA",
+
+      ContextNetworkName: "OPCUA Réseau",
+      OrganNetworkName: "spinal-organ-opcua-dev-2",
+      NetworkName: "WBOX3",
     };
   },
   components: {
@@ -106,10 +152,16 @@ export default {
                 this.positionContextName, 
                 this.positionCategoryName, 
                 this.positionGroupName, 
+                
+                this.GatewayContextName,
+                this.GatewayCategoryName,
+                this.GatewayGroupName,
+
+                this.ContextNetworkName,
+                this.OrganNetworkName,
+                this.NetworkName,
+
                 this.lum_contextName, 
-                this.lum_catName, 
-                this.lum_grpName, 
-                this.lum_distance, 
                 this.option
             );
         } else if (!this.lum_isShown && this.store_isShown) {
@@ -117,10 +169,16 @@ export default {
                 this.positionContextName, 
                 this.positionCategoryName, 
                 this.positionGroupName, 
+                
+                this.GatewayContextName,
+                this.GatewayCategoryName,
+                this.GatewayGroupName,
+
+                this.ContextNetworkName,
+                this.OrganNetworkName,
+                this.NetworkName,
+
                 this.store_contextName, 
-                this.store_catName, 
-                this.store_grpName, 
-                this.store_distance, 
                 this.option
             );
         } else if (this.lum_isShown && this.store_isShown) {
@@ -129,20 +187,32 @@ export default {
                 this.positionContextName, 
                 this.positionCategoryName, 
                 this.positionGroupName, 
+                
+                this.GatewayContextName,
+                this.GatewayCategoryName,
+                this.GatewayGroupName,
+
+                this.ContextNetworkName,
+                this.OrganNetworkName,
+                this.NetworkName,
+
                 this.lum_contextName, 
-                this.lum_catName, 
-                this.lum_grpName, 
-                this.lum_distance, 
                 this.option
             );
             await hardwarecontexteGeneration(
                 this.positionContextName, 
                 this.positionCategoryName, 
                 this.positionGroupName, 
+                
+                this.GatewayContextName,
+                this.GatewayCategoryName,
+                this.GatewayGroupName,
+
+                this.ContextNetworkName,
+                this.OrganNetworkName,
+                this.NetworkName,
+
                 this.store_contextName, 
-                this.store_catName, 
-                this.store_grpName, 
-                this.store_distance, 
                 this.option
             );
         }
@@ -185,74 +255,54 @@ export default {
   },
   computed: {
     btnDisabled() {
-  // Check if `lum_isShown` is true and required fields are not empty
-  if (this.lum_isShown && !this.store_isShown) {
-    if (
-      this.lum_contextName !== "" &&
-      this.lum_catName !== "" &&
-      this.lum_grpName !== "" &&
-      this.positionContextName !== "" &&
-      this.positionCategoryName !== "" &&
-      this.positionGroupName !== ""
-    ) {
-      return false; // Enable the button
-    }
-  }
+      const requiredFields = [
 
-  // Check if `store_isShown` is true and required fields are not empty
-  if (this.store_isShown && !this.lum_isShown) {
-    if (
-      this.store_contextName !== "" &&
-      this.store_catName !== "" &&
-      this.store_grpName !== "" &&
-      this.positionContextName !== "" &&
-      this.positionCategoryName !== "" &&
-      this.positionGroupName !== ""
-    ) {
-      return false; // Enable the button
-    }
-  }
+        this.positionContextName,
+        this.positionCategoryName,
+        this.positionGroupName,
+        
+        this.GatewayContextName,
+        this.GatewayCategoryName,
+        this.GatewayGroupName,
 
-  // Check if both `lum_isShown` and `store_isShown` are true and required fields are not empty
-  if (this.lum_isShown && this.store_isShown) {
-    if (
-      this.lum_contextName !== "" &&
-      this.lum_catName !== "" &&
-      this.lum_grpName !== "" &&
-      this.store_contextName !== "" &&
-      this.store_catName !== "" &&
-      this.store_grpName !== "" &&
-      this.positionContextName !== "" &&
-      this.positionCategoryName !== "" &&
-      this.positionGroupName !== ""
-    ) {
-      return false; // Enable the button
-    }
-  }
+        this.ContextNetworkName,
+        this.OrganNetworkName,
+        this.NetworkName,
 
-  // If none of the conditions are met, disable the button
-  return true;
-}
+        
+        this.lum_contextName,
+        this.store_contextName,
+      ];
 
-}
+      if (this.lum_isShown && this.store_isShown) {
+        return !requiredFields.every(field => field !== "") ||
+               this.lum_contextName === "" ||
+               this.store_contextName === "";
+      } else if (this.lum_isShown) {
+        return !requiredFields.every(field => field !== "") ||
+               this.lum_contextName === "";
+      } else if (this.store_isShown) {
+        return !requiredFields.every(field => field !== "") ||
+               this.store_contextName === "";
+      }
+      return true;
+    },
+  },
 };
-
-
 </script>
+
 
 <style>
 .my-test-panel-container {
- 
   padding: 15px;
-  
 }
 
-.positions-section {
+.positions-section, .Gateway-section, .Network-section {
   margin-bottom: 15px;
 }
 
-.positions-section h3 {
+.positions-section h3, .Gateway-section h3, .Network-section h3 {
   margin-bottom: 10px;
-  
 }
 </style>
+
