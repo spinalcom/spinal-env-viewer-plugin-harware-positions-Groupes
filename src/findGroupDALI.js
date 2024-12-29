@@ -206,7 +206,7 @@ export async function AddGrpToPos(PositionContext,gateway,floorname,GrpcontextID
                                     // crétaion des noeuds --------
                                     let grpname = Grchild.name.get()
                                     // Create a  Node (grp name, Network type)and add it as a child to the position
-                                    /*
+                                    
                                     let nodeID = spinal.spinalGraphService.createNode({name:grpname, type: "network"})
                                     let creatednode = await spinal.spinalGraphService.addChildInContext(Posi.id.get(), nodeID, GrpcontextID, "hasNetworkTreeGroup", "PtrLst")
                                     console.log(creatednode)
@@ -222,7 +222,7 @@ export async function AddGrpToPos(PositionContext,gateway,floorname,GrpcontextID
                                             console.error("error adding to bmsnode",e)
                                         }
                                         
-                                    }else {console.error(" error creating node for ",Grchild.name.get())}  */ 
+                                    }else {console.error(" error creating node for ",Grchild.name.get())}  
                                         
                                         //---fin création des noeuds -----------
 
@@ -237,7 +237,7 @@ export async function AddGrpToPos(PositionContext,gateway,floorname,GrpcontextID
                                         //crétaion des noeuds --------
                                     let grpname = Grchild.name.get()
                                     // Create a  Node (grp name, Network type)and add it as a child to the position
-                                    /*
+                                    
                                     let nodeID = spinal.pinalGraphService.createNode({name:grpname, type: "network"})
                                     let creatednode = await spinal.spinalGraphService.addChildInContext(Posi.id.get(), nodeID, GrpcontextID, "hasNetworkTreeGroup", "PtrLst")
                                     console.log(creatednode)
@@ -253,7 +253,7 @@ export async function AddGrpToPos(PositionContext,gateway,floorname,GrpcontextID
                                             console.error("error adding to bmsnode",e)
                                         }
                                         
-                                    }else {console.error(" error creating node for ",Grchild.name.get())}   */
+                                    }else {console.error(" error creating node for ",Grchild.name.get())}   
                                         
                                         //---fin création des noeuds --------------
                                     

@@ -36,7 +36,7 @@ export async function hardwarecontexteGeneration(PosContextName, PosCategoryName
 
     //console.log("PositionbyFloor",PositionbyFloor);
      console.log("Starting process to add positions...")
-    /*for (const pos of PositionbyFloor) {
+    for (const pos of PositionbyFloor) {
       console.log("in loop") 
         try {
            
@@ -47,7 +47,7 @@ export async function hardwarecontexteGeneration(PosContextName, PosCategoryName
         } catch (error) {
           console.error("Error processing position:", pos.Position.name?.get(), error);
         }
-      }*/
+      }
      
       console.log("Starting process to add Groups to positions ...")  
    
