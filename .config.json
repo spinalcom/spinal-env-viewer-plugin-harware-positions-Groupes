@@ -1,0 +1,38 @@
+{
+
+    
+    "Positions_BIM_Context": {
+      
+        "positionContextName": "Gestion des équipements",
+        "positionCategoryName": "Typologie",
+
+        "positionGroupName": "Positions de travail"
+        
+     
+  },
+    "Gatway_BIM_Context": {
+      
+        "GatewayContextName": "Gestion des équipements",
+        "GatewayCategoryName": "Network",
+        "GatewayGroupName": "OPCUA"
+        
+     
+  },
+
+  
+  "OPCUA_Context": {
+      
+    "ContextNetworkName": "OPCUA Réseau",
+    "OrganNetworkName": "spinal-organ-opcua-dev-2",
+    "NetworkName": "WBOX3"
+},
+
+  "Position_To_Lum_Context": {
+      
+        "lum_contextName": "Hardware Context Luminaires"
+      
+     
+  }
+
+
+}

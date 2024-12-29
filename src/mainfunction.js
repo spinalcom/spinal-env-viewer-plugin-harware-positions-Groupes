@@ -32,11 +32,11 @@ export async function hardwarecontexteGeneration(PosContextName, PosCategoryName
     const positionsList = await getPositions(PositionContext, PositionCategory, GroupPos);
     console.log("positionsList :",positionsList)
 
-    const PositionbyFloor = await getFloorPos(positionsList, option.selectedNode.name.get());
+    //const PositionbyFloor = await getFloorPos(positionsList, option.selectedNode.name.get());
 
     //console.log("PositionbyFloor",PositionbyFloor);
      console.log("Starting process to add positions...")
-    for (const pos of PositionbyFloor) {
+    /*for (const pos of PositionbyFloor) {
       console.log("in loop") 
         try {
            
@@ -47,10 +47,10 @@ export async function hardwarecontexteGeneration(PosContextName, PosCategoryName
         } catch (error) {
           console.error("Error processing position:", pos.Position.name?.get(), error);
         }
-      }
+      }*/
      
       console.log("Starting process to add Groups to positions ...")  
-
+   
       const bimgatways = await FindBimGateways(GatContexte, GatCategory, GatGroup);
       console.log("bimgatways",bimgatways)
       
